@@ -1,11 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, GraduationCap, Sparkles } from "lucide-react";
+import { Send, GraduationCap, Sparkles, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
 import { SwitchboardLogo } from "@/components/SwitchboardLogo";
 import { ModelCard, MODELS, type ModelMeta } from "@/components/ModelCard";
 import { routePrompt, type ModelId } from "@/lib/router";
 import { curate } from "@/lib/curate";
+import { callOpenRouter } from "@/lib/api";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -63,14 +65,17 @@ function ChatPage() {
     active.forEach((m) => { fresh[m.id] = ""; });
     setResponses(fresh);
 
-    // Simulated responses (no backend wired). Curated before display.
     active.forEach((m) => {
-      const delay = 600 + Math.random() * 1200;
-      setTimeout(() => {
-        const raw = mockResponse(m, prompt);
-        setResponses((r) => ({ ...r, [m.id]: curate(raw) }));
-        setLoading((l) => ({ ...l, [m.id]: false }));
-      }, delay);
+      callOpenRouter(prompt, m.id)
+        .then((text) => {
+          setResponses((r) => ({ ...r, [m.id]: curate(text) }));
+        })
+        .catch((err) => {
+          setResponses((r) => ({ ...r, [m.id]: `Error: ${err.message}` }));
+        })
+        .finally(() => {
+          setLoading((l) => ({ ...l, [m.id]: false }));
+        });
     });
   };
 
@@ -91,6 +96,26 @@ function ChatPage() {
       <div className="px-5 sm:px-8 py-4 flex flex-wrap gap-2">
         {MODELS.map((m) => (
           <ModelChip key={m.id} model={m} active={selected[m.id]} onClick={() => toggle(m.id)} />
+        ))}
+      </div>
+
+      {/* Tool buttons */}
+      <div className="px-5 sm:px-8 pb-3 flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium text-muted-foreground mr-1">Send to Tools →</span>
+        {TOOLS.map((tool) => (
+          <button
+            key={tool.name}
+            onClick={() => {
+              navigator.clipboard.writeText(prompt);
+              window.open(tool.url, "_blank");
+              toast(`Prompt copied! Paste it in ${tool.name}`);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 hover:border-foreground/30 transition"
+            style={{ color: tool.color, borderColor: tool.color + "40" }}
+          >
+            <ExternalLink className="size-3" />
+            {tool.name}
+          </button>
         ))}
       </div>
 
@@ -182,6 +207,9 @@ function ModelChip({ model, active, onClick }: { model: ModelMeta; active: boole
   );
 }
 
-function mockResponse(m: ModelMeta, prompt: string): string {
-  return `Certainly! Here's a ${m.name} take on: "${prompt.slice(0, 80)}"\n\n— Key idea one with solid reasoning.\n— Key idea two with a concrete example.\n— Key idea three you can use right away.\n\nI hope this helps!`;
-}
+const TOOLS = [
+  { name: "Figma AI", url: "https://www.figma.com/ai", color: "#A855F7" },
+  { name: "Canva AI", url: "https://www.canva.com/ai-image-generator", color: "#06B6D4" },
+  { name: "Notion AI", url: "https://www.notion.so/product/ai", color: "#FFFFFF" },
+  { name: "Lovable AI", url: "https://lovable.dev", color: "#EC4899" },
+];
