@@ -36,7 +36,7 @@ async function callGroq(prompt: string): Promise<string> {
 
 async function callGemini(prompt: string): Promise<string> {
   const res = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6Iyow5B6HId2XNSJN1MaQDafrZ0_A4cTa7xrZE4_BiPCw",
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AQ.Ab8RN6I4vBykkdCW1wZL9K4tTW1hx5JM3lrcLB-osN21tRDO0Q",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -48,19 +48,19 @@ async function callGemini(prompt: string): Promise<string> {
   return data.candidates[0].content.parts[0].text;
 }
 
-async function callDeepSeek(prompt: string): Promise<string> {
-  const res = await fetch("https://api.deepseek.com/chat/completions", {
+async function callGemma(prompt: string): Promise<string> {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
-      Authorization: "Bearer sk-1a6f8701e0404f1985204927247be08e",
+      Authorization: "Bearer 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",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "deepseek-chat",
+      model: "gemma2-9b-it",
       messages: [{ role: "user", content: prompt }],
     }),
   });
-  if (!res.ok) throw new Error(`DeepSeek error: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw new Error(`Gemma error: ${res.status} ${await res.text()}`);
   const data = await res.json();
   return data.choices[0].message.content;
 }
@@ -74,6 +74,6 @@ export async function callModel(prompt: string, model: ModelId): Promise<string>
     case "gemini":
       return callGemini(prompt);
     case "deepseek":
-      return callDeepSeek(prompt);
+      return callGemma(prompt);
   }
 }
