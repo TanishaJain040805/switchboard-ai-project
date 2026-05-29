@@ -8,7 +8,7 @@ const MODEL_MAP: Record<ModelId, string> = {
 };
 
 export async function callOpenRouter(prompt: string, model: ModelId): Promise<string> {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const apiKey = "sk-or-v1-your-actual-key-here";
   if (!apiKey) {
     throw new Error("VITE_OPENROUTER_API_KEY is not set");
   }
