@@ -8,9 +8,9 @@ const MODEL_MAP: Record<ModelId, string> = {
 };
 
 export async function callOpenRouter(prompt: string, model: ModelId): Promise<string> {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const apiKey = localStorage.getItem("openrouter_api_key");
   if (!apiKey) {
-    throw new Error("VITE_OPENROUTER_API_KEY is not set");
+    throw new Error("OpenRouter API key not set. Click the gear icon ⚙ to add your key.");
   }
 
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {

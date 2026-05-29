@@ -1,13 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, GraduationCap, Sparkles, ExternalLink } from "lucide-react";
+import { Send, GraduationCap, Sparkles, ExternalLink, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { SwitchboardLogo } from "@/components/SwitchboardLogo";
 import { ModelCard, MODELS, type ModelMeta } from "@/components/ModelCard";
 import { routePrompt, type ModelId } from "@/lib/router";
 import { curate } from "@/lib/curate";
 import { callOpenRouter } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -34,6 +42,8 @@ function ChatPage() {
   const [responses, setResponses] = useState<Record<ModelId, string>>({
     claude: "", "gpt-4o": "", gemini: "", grok: "",
   });
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem("openrouter_api_key") ?? "");
 
   // Debounce prompt for suggestion banner
   useEffect(() => {
@@ -84,9 +94,18 @@ function ChatPage() {
       {/* Navbar */}
       <header className="px-5 sm:px-8 py-4 flex items-center justify-between">
         <Link to="/"><SwitchboardLogo /></Link>
-        <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 bg-card">
-          <GraduationCap className="size-3.5 text-cyan" style={{ color: "#06B6D4" }} />
-          Student Mode
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setSettingsOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 bg-card hover:bg-secondary/70 transition"
+          >
+            <Settings className="size-3.5" />
+            Settings
+          </button>
+          <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 bg-card">
+            <GraduationCap className="size-3.5 text-cyan" style={{ color: "#06B6D4" }} />
+            Student Mode
+          </div>
         </div>
       </header>
 
@@ -188,6 +207,42 @@ function ChatPage() {
           ⚡ Powered by OpenRouter
         </div>
       </div>
+
+      {/* Settings dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>OpenRouter API Key</DialogTitle>
+            <DialogDescription>
+              Enter your OpenRouter API key. It is stored locally in your browser and never sent anywhere except to OpenRouter.
+            </DialogDescription>
+          </DialogHeader>
+          <input
+            value={apiKeyInput}
+            onChange={(e) => setApiKeyInput(e.target.value)}
+            placeholder="sk-or-v1-..."
+            className="w-full rounded-lg border border-border/70 bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <div className="flex justify-end gap-2">
+            <DialogClose
+              onClick={() => setApiKeyInput(localStorage.getItem("openrouter_api_key") ?? "")}
+              className="rounded-lg px-3 py-2 text-sm font-medium border border-border/70 hover:bg-secondary/70 transition"
+            >
+              Cancel
+            </DialogClose>
+            <DialogClose
+              onClick={() => {
+                localStorage.setItem("openrouter_api_key", apiKeyInput);
+                toast("API key saved");
+              }}
+              className="rounded-lg px-3 py-2 text-sm font-medium text-white transition"
+              style={{ background: "linear-gradient(135deg, #7C3AED, #5b21b6)" }}
+            >
+              Save
+            </DialogClose>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
