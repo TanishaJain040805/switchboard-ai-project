@@ -8,7 +8,11 @@ const MODEL_MAP: Record<ModelId, string> = {
 };
 
 export async function callOpenRouter(prompt: string, model: ModelId): Promise<string> {
+<<<<<<< HEAD
   const apiKey = localStorage.getItem("openrouter_api_key");
+=======
+  const apiKey = "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";
+>>>>>>> 801c27ee9ca01995b0df8934d65c4357a3daafd7
   if (!apiKey) {
     throw new Error("OpenRouter API key not set. Click the gear icon ⚙ to add your key.");
   }
