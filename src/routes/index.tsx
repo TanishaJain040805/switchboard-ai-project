@@ -90,7 +90,7 @@ function Landing() {
       </main>
 
       <footer className="relative z-10 text-center text-xs text-muted-foreground pb-8">
-        ⚡ Powered by OpenRouter
+        One prompt. Every AI.
       </footer>
     </div>
   );

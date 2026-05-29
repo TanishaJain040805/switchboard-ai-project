@@ -1,27 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, GraduationCap, Sparkles, ExternalLink, Settings } from "lucide-react";
+import { Send, GraduationCap, Sparkles, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { SwitchboardLogo } from "@/components/SwitchboardLogo";
 import { ModelCard, MODELS, type ModelMeta } from "@/components/ModelCard";
 import { routePrompt, type ModelId } from "@/lib/router";
 import { curate } from "@/lib/curate";
-import { callOpenRouter } from "@/lib/api";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { callModel } from "@/lib/api";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
       { title: "Switchboard - Chat" },
-      { name: "description", content: "Run one prompt across Claude, GPT-4o, Gemini, and Grok side by side." },
+      { name: "description", content: "Run one prompt across Mistral, Groq, Gemini, and DeepSeek side by side." },
     ],
   }),
   component: ChatPage,
@@ -29,21 +21,19 @@ export const Route = createFileRoute("/chat")({
 
 function ChatPage() {
   const [selected, setSelected] = useState<Record<ModelId, boolean>>({
-    claude: true,
-    "gpt-4o": true,
+    mistral: true,
+    groq: true,
     gemini: true,
-    grok: true,
+    deepseek: true,
   });
   const [prompt, setPrompt] = useState("");
   const [debounced, setDebounced] = useState("");
   const [loading, setLoading] = useState<Record<ModelId, boolean>>({
-    claude: false, "gpt-4o": false, gemini: false, grok: false,
+    mistral: false, groq: false, gemini: false, deepseek: false,
   });
   const [responses, setResponses] = useState<Record<ModelId, string>>({
-    claude: "", "gpt-4o": "", gemini: "", grok: "",
+    mistral: "", groq: "", gemini: "", deepseek: "",
   });
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState(() => localStorage.getItem("openrouter_api_key") ?? "");
 
   // Debounce prompt for suggestion banner
   useEffect(() => {
@@ -57,7 +47,7 @@ function ChatPage() {
 
   const useSuggested = () => {
     if (suggestion.isDefault) return;
-    const next: Record<ModelId, boolean> = { claude: false, "gpt-4o": false, gemini: false, grok: false };
+    const next: Record<ModelId, boolean> = { mistral: false, groq: false, gemini: false, deepseek: false };
     suggestion.models.forEach((m) => { next[m] = true; });
     setSelected(next);
   };
@@ -76,7 +66,7 @@ function ChatPage() {
     setResponses(fresh);
 
     active.forEach((m) => {
-      callOpenRouter(prompt, m.id)
+      callModel(prompt, m.id)
         .then((text) => {
           setResponses((r) => ({ ...r, [m.id]: curate(text) }));
         })
@@ -95,13 +85,6 @@ function ChatPage() {
       <header className="px-5 sm:px-8 py-4 flex items-center justify-between">
         <Link to="/"><SwitchboardLogo /></Link>
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 bg-card hover:bg-secondary/70 transition"
-          >
-            <Settings className="size-3.5" />
-            Settings
-          </button>
           <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium border border-border/70 bg-card">
             <GraduationCap className="size-3.5 text-cyan" style={{ color: "#06B6D4" }} />
             Student Mode
@@ -200,49 +183,6 @@ function ChatPage() {
           </div>
         </div>
       </div>
-
-      {/* OpenRouter badge */}
-      <div className="fixed bottom-3 left-3 z-30 hidden sm:block">
-        <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] border border-border/70 bg-card/80 backdrop-blur text-muted-foreground">
-          ⚡ Powered by OpenRouter
-        </div>
-      </div>
-
-      {/* Settings dialog */}
-      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>OpenRouter API Key</DialogTitle>
-            <DialogDescription>
-              Enter your OpenRouter API key. It is stored locally in your browser and never sent anywhere except to OpenRouter.
-            </DialogDescription>
-          </DialogHeader>
-          <input
-            value={apiKeyInput}
-            onChange={(e) => setApiKeyInput(e.target.value)}
-            placeholder="sk-or-v1-..."
-            className="w-full rounded-lg border border-border/70 bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-          />
-          <div className="flex justify-end gap-2">
-            <DialogClose
-              onClick={() => setApiKeyInput(localStorage.getItem("openrouter_api_key") ?? "")}
-              className="rounded-lg px-3 py-2 text-sm font-medium border border-border/70 hover:bg-secondary/70 transition"
-            >
-              Cancel
-            </DialogClose>
-            <DialogClose
-              onClick={() => {
-                localStorage.setItem("openrouter_api_key", apiKeyInput);
-                toast("API key saved");
-              }}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-white transition"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #5b21b6)" }}
-            >
-              Save
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

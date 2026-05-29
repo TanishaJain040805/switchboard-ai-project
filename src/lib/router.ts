@@ -1,4 +1,4 @@
-export type ModelId = "claude" | "gpt-4o" | "gemini" | "grok";
+export type ModelId = "mistral" | "groq" | "gemini" | "deepseek";
 
 export interface Suggestion {
   text: string;
@@ -11,18 +11,18 @@ export function routePrompt(prompt: string): Suggestion {
 
   if (/(project|internship|placement|interview)/.test(p)) {
     return {
-      text: "Suggested: Claude + GPT-4o - best for project work",
-      models: ["claude", "gpt-4o"],
+      text: "Suggested: Mistral + Groq - best for project work",
+      models: ["mistral", "groq"],
     };
   }
   if (/(code|debug|error|bug|stack trace|exception)/.test(p)) {
-    return { text: "Suggested: Claude - best for code & debugging", models: ["claude"] };
+    return { text: "Suggested: Mistral - best for code & debugging", models: ["mistral"] };
   }
   if (/(essay|write|report|resume|cover letter|professional)/.test(p)) {
-    return { text: "Suggested: GPT-4o - best for writing & professional docs", models: ["gpt-4o"] };
+    return { text: "Suggested: Groq - best for writing & professional docs", models: ["groq"] };
   }
   if (/(search|latest|news|2024|2025|today|trending)/.test(p)) {
-    return { text: "Suggested: Grok - best for real-time info", models: ["grok"] };
+    return { text: "Suggested: DeepSeek - best for real-time info", models: ["deepseek"] };
   }
   if (/(image|design|visual|figma|ui|ux|diagram)/.test(p)) {
     return { text: "Suggested: Gemini - best for visual/design tasks", models: ["gemini"] };
@@ -30,7 +30,7 @@ export function routePrompt(prompt: string): Suggestion {
 
   return {
     text: "Running on all selected models",
-    models: ["claude", "gpt-4o", "gemini", "grok"],
+    models: ["mistral", "groq", "gemini", "deepseek"],
     isDefault: true,
   };
 }

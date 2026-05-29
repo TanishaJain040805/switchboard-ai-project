@@ -3,18 +3,18 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 export interface ModelMeta {
-  id: "claude" | "gpt-4o" | "gemini" | "grok";
+  id: "mistral" | "groq" | "gemini" | "deepseek";
   name: string;
-  color: string;       // hex for header bar
-  glowClass: string;   // utility class with box-shadow
-  icon: string;        // emoji/glyph
+  color: string;
+  glowClass: string;
+  icon: string;
 }
 
 export const MODELS: ModelMeta[] = [
-  { id: "claude", name: "Claude", color: "#F59E50", glowClass: "glow-claude", icon: "✦" },
-  { id: "gpt-4o", name: "GPT-4o", color: "#34D399", glowClass: "glow-gpt", icon: "◎" },
+  { id: "mistral", name: "Mistral", color: "#F59E50", glowClass: "glow-mistral", icon: "✦" },
+  { id: "groq", name: "Groq", color: "#34D399", glowClass: "glow-groq", icon: "◎" },
   { id: "gemini", name: "Gemini", color: "#60A5FA", glowClass: "glow-gemini", icon: "✧" },
-  { id: "grok", name: "Grok", color: "#F472B6", glowClass: "glow-grok", icon: "✕" },
+  { id: "deepseek", name: "DeepSeek", color: "#F472B6", glowClass: "glow-deepseek", icon: "✕" },
 ];
 
 interface Props {
